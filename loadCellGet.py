@@ -40,27 +40,27 @@ def serialSend(self, data):
 
 def onVoltageRatioInput0_VoltageRatioChange(self, voltageRatio):
 	print("VoltageRatio [0]: " + str(voltageRatio))
-    ser.write(str.encode('#')) 
-    ser.write(str.encode('#'))
-    ser.write(struct.pack('f',voltageRatio))
+    # ser.write(str.encode('#')) 
+    # ser.write(str.encode('#'))
+    # ser.write(struct.pack('f',voltageRatio))
 
 def onVoltageRatioInput1_VoltageRatioChange(self, voltageRatio):
 	print("VoltageRatio [1]: " + str(voltageRatio))
-    ser.write(str.encode('#')) 
-    ser.write(str.encode('#'))
-    ser.write(struct.pack('f',voltageRatio))
+    # ser.write(str.encode('#')) 
+    # ser.write(str.encode('#'))
+    # ser.write(struct.pack('f',voltageRatio))
 
 def onVoltageRatioInput2_VoltageRatioChange(self, voltageRatio):
 	print("VoltageRatio [2]: " + str(voltageRatio))
-    ser.write(str.encode('#')) 
-    ser.write(str.encode('#'))
-    ser.write(struct.pack('f',voltageRatio))
+    # ser.write(str.encode('#')) 
+    # ser.write(str.encode('#'))
+    # ser.write(struct.pack('f',voltageRatio))
 
 def onVoltageRatioInput3_VoltageRatioChange(self, voltageRatio):
 	print("VoltageRatio [3]: " + str(voltageRatio))
-    ser.write(str.encode('#')) 
-    ser.write(str.encode('#'))
-    ser.write(struct.pack('f',voltageRatio))
+    # ser.write(str.encode('#')) 
+    # ser.write(str.encode('#'))
+    # ser.write(struct.pack('f',voltageRatio))
 
 def main():
     
@@ -102,6 +102,13 @@ def main():
 	voltageRatioInput3.openWaitForAttachment(5000)
 
 	#Do stuff with your Phidgets here or in your event handlers.
+
+	ser.write(str.encode('#')) 
+    ser.write(str.encode('#'))
+    ser.write(struct.pack('f',voltageRatioInput0.getVoltageRatio()))
+    ser.write(struct.pack('f',voltageRatioInput1.getVoltageRatio()))
+    ser.write(struct.pack('f',voltageRatioInput2.getVoltageRatio()))
+    ser.write(struct.pack('f',voltageRatioInput3.getVoltageRatio()))
 
 	try:
 		input("Press Enter to Stop\n")
