@@ -2,7 +2,6 @@ from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageRatioInput import *
 import time
 
-
 '''
 UART communicate of F28379D and raspberry pi through python
 ref: https://pyserial.readthedocs.io/en/latest/shortintro.html
@@ -28,45 +27,50 @@ from serial import Serial
 # floats = struct.unpack('ffffffffff',s) # unpack 40 bytes as 10 floats
 # print(floats)
 
-def serialSend(self, data):
+#def serialSend(self, data):
     '''
     2) Send "##" as header, then follow by 10 floats to F28
     '''
-    ser.write(str.encode('#')) 
-    ser.write(str.encode('#'))
-    ser.write(struct.pack('f',data))
+    # ser.write(str.encode('#')) 
+    # ser.write(str.encode('#'))
+    # ser.write(struct.pack('f',data))
+
+#Insert your gain value from the Phidget Control Panel
+gain = [2e8,2e8,2e8,2e8]
+
+#The offset is calculated in tareScale
+offset = [0,0,0,0]
+
+calibrated = [False,False,False,False]
+
+#Calculate offset
+def tareScale(ch):    
+    global offset, calibrated
+    num_samples = 4
+
+    for i in range(num_samples):
+        offset[ch.getChannel()] += ch.getVoltageRatio()
+        time.sleep(ch.getDataInterval()/1000.0)
+        
+    offset /= num_samples
+    calibrated = True    
+
 
 #Declare any event handlers here. These will be called every time the associated event occurs.
 
-def onVoltageRatioInput0_VoltageRatioChange(self, voltageRatio):
-	print("VoltageRatio [0]: " + str(voltageRatio))
-    # ser.write(str.encode('#')) 
-    # ser.write(str.encode('#'))
-    # ser.write(struct.pack('f',voltageRatio))
-
-def onVoltageRatioInput1_VoltageRatioChange(self, voltageRatio):
-	print("VoltageRatio [1]: " + str(voltageRatio))
-    # ser.write(str.encode('#')) 
-    # ser.write(str.encode('#'))
-    # ser.write(struct.pack('f',voltageRatio))
-
-def onVoltageRatioInput2_VoltageRatioChange(self, voltageRatio):
-	print("VoltageRatio [2]: " + str(voltageRatio))
-    # ser.write(str.encode('#')) 
-    # ser.write(str.encode('#'))
-    # ser.write(struct.pack('f',voltageRatio))
-
-def onVoltageRatioInput3_VoltageRatioChange(self, voltageRatio):
-	print("VoltageRatio [3]: " + str(voltageRatio))
-    # ser.write(str.encode('#')) 
-    # ser.write(str.encode('#'))
-    # ser.write(struct.pack('f',voltageRatio))
+def onVoltageRatioChange(self, voltageRatio):
+	print("VoltageRatio [" + str(self.getChannel()) + "]: " + str(voltageRatio))
+	
+	if(calibrated):
+    #Apply the calibration parameters (gain, offset) to the raw voltage ratio
+	#If there is a preload, add it to offset like this (voltageRatio - offset[self.getChannel()+preload])
+        weight = (voltageRatio - offset[self.getChannel()]) * gain[self.getChannel()]
+        print("Weight [" + str(self.getChannel()) + "]: " + str(weight))
+		ser.write(str.encode('#')) 
+		ser.write(str.encode('#'))
+		ser.write(struct.pack('f',weight))
 
 def main():
-    
-	# initialize the serial port
-	ser = serial.Serial("/dev/ttyAMA1", 115200) #Open port with baud rate
-
 	#Create your Phidget channels
 	voltageRatioInput0 = VoltageRatioInput()
 	voltageRatioInput1 = VoltageRatioInput()
@@ -79,21 +83,11 @@ def main():
 	voltageRatioInput2.setChannel(2)
 	voltageRatioInput3.setChannel(3)
 
-	voltageRatioInput0.setDataRate(250)
-	voltageRatioInput1.setDataRate(250)
-	voltageRatioInput2.setDataRate(250)
-	voltageRatioInput3.setDataRate(250)
- 
-	voltageRatioInput0.setDataInterval(4)
-	voltageRatioInput1.setDataInterval(4)
-	voltageRatioInput2.setDataInterval(4)
-	voltageRatioInput3.setDataInterval(4)
- 
 	#Assign any event handlers you need before calling open so that no events are missed.
-	voltageRatioInput0.setOnVoltageRatioChangeHandler(onVoltageRatioInput0_VoltageRatioChange)
-	voltageRatioInput1.setOnVoltageRatioChangeHandler(onVoltageRatioInput1_VoltageRatioChange)
-	voltageRatioInput2.setOnVoltageRatioChangeHandler(onVoltageRatioInput2_VoltageRatioChange)
-	voltageRatioInput3.setOnVoltageRatioChangeHandler(onVoltageRatioInput3_VoltageRatioChange)
+	voltageRatioInput0.setOnVoltageRatioChangeHandler(onVoltageRatioChange)
+	voltageRatioInput1.setOnVoltageRatioChangeHandler(onVoltageRatioChange)
+	voltageRatioInput2.setOnVoltageRatioChangeHandler(onVoltageRatioChange)
+	voltageRatioInput3.setOnVoltageRatioChangeHandler(onVoltageRatioChange)
 
 	#Open your Phidgets and wait for attachment
 	voltageRatioInput0.openWaitForAttachment(5000)
@@ -102,13 +96,6 @@ def main():
 	voltageRatioInput3.openWaitForAttachment(5000)
 
 	#Do stuff with your Phidgets here or in your event handlers.
-
-	ser.write(str.encode('#')) 
-    ser.write(str.encode('#'))
-    ser.write(struct.pack('f',voltageRatioInput0.getVoltageRatio()))
-    ser.write(struct.pack('f',voltageRatioInput1.getVoltageRatio()))
-    ser.write(struct.pack('f',voltageRatioInput2.getVoltageRatio()))
-    ser.write(struct.pack('f',voltageRatioInput3.getVoltageRatio()))
 
 	try:
 		input("Press Enter to Stop\n")
