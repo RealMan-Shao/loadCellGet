@@ -52,8 +52,8 @@ def tareScale(ch):
         offset[ch.getChannel()] += ch.getVoltageRatio()
         time.sleep(ch.getDataInterval()/1000.0)
         
-    offset /= num_samples
-    calibrated = True    
+    offset[ch.getChannel()] /= num_samples
+    calibrated[ch.getChannel()] = True    
 
 
 #Declare any event handlers here. These will be called every time the associated event occurs.
@@ -61,7 +61,7 @@ def tareScale(ch):
 def onVoltageRatioChange(self, voltageRatio):
 	print("VoltageRatio [" + str(self.getChannel()) + "]: " + str(voltageRatio))
 	
-	if(calibrated):
+	if(calibrated[self.getChannel()]):
     #Apply the calibration parameters (gain, offset) to the raw voltage ratio
 	#If there is a preload, add it to offset like this (voltageRatio - offset[self.getChannel()+preload])
         weight = (voltageRatio - offset[self.getChannel()]) * gain[self.getChannel()]
