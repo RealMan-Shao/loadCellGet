@@ -71,6 +71,8 @@ def main():
     # voltageRatioInput3.openWaitForAttachment(5000)
 
     # Do stuff with your Phidgets here or in your event handlers.
+    time.sleep(1)
+    tareScale(voltageRatioInput0)
 
     try:
         input("Press Enter to Stop\n")
