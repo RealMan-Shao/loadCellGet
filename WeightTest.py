@@ -7,7 +7,6 @@ import numpy
 import threading
 
 # Serial communication setup
-#ser = serial.Serial('/dev/serial0', 9600, timeout=1)  # Adjust port and baud rate as needed
 ser = serial.Serial(
     port="/dev/ttyTHS1",
     baudrate=115200,
@@ -15,6 +14,7 @@ ser = serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
 )
+
 # Header and data sending functions
 def send_header():
     ser.write(str.encode('#'))  # Sending "##" as the header
@@ -41,6 +41,7 @@ offset = [0, 0, 0, 0]
 calibrated = [True, True, True, True]
 
 weightList=[0,0,0,0]
+
 # Calculate offset
 def tareScale(ch):    
     global offset, calibrated
@@ -60,12 +61,9 @@ def onVoltageRatioChange(self, voltageRatio):
     # If there is a preload, add it to offset like this (voltageRatio - offset[self.getChannel()+preload])
     if calibrated[self.getChannel()]:
         weightList[self.getChannel()] = ((voltageRatio - offset[self.getChannel()]) * gain[self.getChannel()])
-        #print("Weight [" + str(self.getChanne(l()) + "]: " + str(weight))
+        #print("Weight [" + str(self.getChanne(l()) + "]: " + str(weight)
 
-
-def main():
-    
-  
+def main():    
     # Create your Phidget channels
     voltageRatioInput0 = VoltageRatioInput()
     voltageRatioInput1 = VoltageRatioInput()
@@ -98,14 +96,9 @@ def main():
     voltageRatioInput3.setDataInterval(16)
     #tareScale(voltageRatioInput0)
     
-    # send_thread = threading.Thread(target = sendThread)
-    # send_thread.start
-    while True:
-    # print(weightList[1])
-        send_header()  # Send header before sending data
-        send_data(weightList[0],weightList[1],weightList[2],weightList[3])  # Send the calculated weight      
-        time.sleep(1)
-    # print('finish')
+    send_thread = threading.Thread(target = sendThread)
+    send_thread.start
+    
     try:
         input("Press Enter to Stop\n")
     except (Exception, KeyboardInterrupt):
